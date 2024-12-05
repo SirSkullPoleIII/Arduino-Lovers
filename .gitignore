@@ -1,0 +1,4 @@
+secrets.h
+*.log
+*.ino.swp
+/build/
