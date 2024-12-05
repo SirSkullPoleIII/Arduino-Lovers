@@ -164,7 +164,7 @@ void sendWhere(String message, bool isLocal){
   if (!isLocal){
     lcdPrint(message);
   }else{
-    sendToExternal(message);
+    addMessageQueue(message);
   }
 }
 
@@ -188,7 +188,7 @@ void lcdPrint(String message) {
 
 }
 
-void lcdIP(){
+void lcdIP(){ // this is because we are using dhcp on the server so it allows you to see the current ip of the server and use that to communicate with the external Arduino
   IPAddress ip = WiFi.localIP();
   String ipString = ip.toString();
   lcdCommand(0xC0);
@@ -224,8 +224,28 @@ void lcdInit(){
   delay(2);
 }
 
-void sendToExternal(String message){
-  Serial.println(message);
+String messageQueue[10];
+int messageCount = 0;
+
+void addMessageQueue(String message){
+  if (messageQueue <10){
+    messageQueue[messageCount++] = message;
+  }else{
+    Serial.println("Message queue Full");
+  }
+}
+
+String getMessageQueue(){
+  if (messageCount > 0) {
+    String message = messageQueue[0]; // first message in queue
+
+    for (int i =1; i < messageCount; i++){
+      messageQueue[i-1] = messageQueue[i];
+    }
+    messageCount--;
+    return message;
+  }
+  return "";
 }
 
 void loop() {
