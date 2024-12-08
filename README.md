@@ -79,5 +79,18 @@ Now go back to `Home_Arduino_Server.ino` and find the line:
 Near the top around line 17, And change out 8040 for whichever port you decided to forward.
 
 #### Setting up DDNS:
+This bit is very easy I used noIP as my DDNS provider which is as simple as making an account and using your free hostname to, well create a host name just use whichever DDNS provider you would prefer and follow their instructions. You will then use 
 
+`yoururl.ddns.net:port` to get to the server from external networks and `serverprivateip:port` from the home network.
+### Final steps:
+You now just need to connect the other LCD to the external arduino and change the address in `External_Arduino_Client.ino` file to the same as the address in the home server. 
 
+Set `//const char* hostName = "Your hostName eg. arduino-lovers.ddns.net";` to your host name
+
+and set
+
+`//const int hostPort = The port you forwarded eg. 8080;` to the port you forwarded dont forget to uncomment the lines.
+now uncomment that code and you should be able to send messages from your phone or computer to the devices. 
+
+### Speaker:
+If you want to connect the speaker just connect power and ground and connect the signal wire to digital pin 9 on the arduino and it should work no problem.
