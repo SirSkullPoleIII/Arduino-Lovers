@@ -1,4 +1,8 @@
 # Arduino-Lovers
+## What is Arduino-Lovers:
+Arduino lovers is a fun little gift idea for couples that want to have a fun way of sending messages to one another. You can send a message from your phone or computer at home and have it show up on their little love box, or they can send a message from their phone or computer and it will show up on yours. IF sending messages from neither network it will show up on both of your boxes.
+
+
 Here I shall guide you through how to setup your own Arduino-Lovers:
 ## What you will need:
  - A 3D printer
