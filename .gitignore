@@ -1,4 +1,5 @@
 secrets.h
+ExternalSecrets.h
 *.log
 *.ino.swp
 /build/

@@ -13,8 +13,9 @@ const long interval = 5000;
 
 const int speakerPin = 9;
 
+String externalArduinoPubIP = "";
 
-WiFiServer server(80);
+WiFiServer server(8040);
 
 void setup() { 
 
@@ -60,14 +61,24 @@ void setup() {
 }
 
 
-bool isLocalIP(WiFiClient client) {
-  IPAddress clientIP = client.remoteIP();
+String isLocalIP(WiFiClient client) {
+  String clientIPString = client.remoteIP().toString();
+  String arduinoPublicIP = externalArduinoPubIP;
   IPAddress localIP = WiFi.localIP();
-  if ((clientIP[0] == localIP[0]) && (clientIP[1] == localIP[1]) && (clientIP[2] == localIP[2])) {
-     Serial.println(clientIP);
-     return true;
+  IPAddress clientIP = client.remoteIP();
+  Serial.println("CLIENT IP ADDRESS " + clientIPString);
+  Serial.println("ARDUINO IP ADDRESS " + arduinoPublicIP);
+
+  if ((clientIP[0] == localIP[0]) && (clientIP[1] == localIP[1]) && (clientIP[2] == localIP[2])){
+    return "client";
+  }else if (
+    (clientIPString.substring(0, clientIPString.indexOf('.')) == arduinoPublicIP.substring(0, arduinoPublicIP.indexOf('.'))) &&
+    (clientIPString.substring(clientIPString.indexOf('.') + 1, clientIPString.indexOf('.', clientIPString.indexOf('.') + 1)) ==
+    arduinoPublicIP.substring(arduinoPublicIP.indexOf('.') + 1, arduinoPublicIP.indexOf('.', arduinoPublicIP.indexOf('.') + 1)))
+  ) {
+     return "host";
   }else{
-    return false;
+    return "host/client";
   }
 }
 
@@ -80,7 +91,7 @@ void handleClient(WiFiClient client) {
   String postData = "";
   bool isPost = false;
 
-  bool ip = isLocalIP(client);
+  String ip = isLocalIP(client);
 
   int contentLength = 0;
   while (client.connected()) {
@@ -90,6 +101,7 @@ void handleClient(WiFiClient client) {
 
       if (c == '\n') {
        if (currentLine.length() == 0){
+
         if(isPost && contentLength > 0) {
           int bytesRead = 0;
           while (bytesRead < contentLength && client.available()) {
@@ -137,6 +149,9 @@ void handleClient(WiFiClient client) {
           }else if (currentLine.startsWith("Content-Length:")) {
             contentLength = currentLine.substring(15).toInt();
             Serial.println("Content Length recieved");
+          }else if (currentLine.startsWith("GET /message")) {
+            Serial.println("Get /message request recieved");
+            sendMessageToClient(client);
           }
 
           currentLine = "";
@@ -151,23 +166,42 @@ void handleClient(WiFiClient client) {
 }
 
 
-void processPostData(WiFiClient client, String postData, bool isLocal) {
+void processPostData(WiFiClient client, String postData, String isLocal) {
+  int ipIndex = postData.indexOf("ip=");
+  if (ipIndex != -1){
+    externalArduinoPubIP = postData.substring(ipIndex +3);
+    externalArduinoPubIP.trim();
+    Serial.println(externalArduinoPubIP);
+  }else{
   String message = postData.substring(8);
   message.replace("+", " ");
   message.replace("%3C", "<");
+  message.replace("%27", "'");
   Serial.println(message);
   sendWhere(message, isLocal);
+  }
 }
 
 
-void sendWhere(String message, bool isLocal){
-  if (!isLocal){
+void sendWhere(String message, String isLocal){
+  if (isLocal == "host"){
     lcdPrint(message);
-  }else{
+  }else if (isLocal == "client"){
+    addMessageQueue(message);
+  }else if (isLocal == "host/client"){
+    lcdPrint(message);
     addMessageQueue(message);
   }
 }
 
+void sendMessageToClient(WiFiClient client) {
+  String message = getMessageQueue();
+  Serial.println("Sending message to client: " + message);
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/plain");
+  client.println();
+  client.println(message.length() > 0 ? message : "\n");
+}
 
 void lcdPrint(String message) {
   lcdCommand(0x01); //clear display before write.
@@ -201,7 +235,7 @@ void lcdIP(){ // this is because we are using dhcp on the server so it allows yo
 }
 
 void lcdCommand(uint8_t cmd){
-  Serial.println("Command sarted");
+  //Serial.println("Command sarted");
   Wire.beginTransmission(LCD_ADDR);
   Wire.write(0x80);
   Wire.write(cmd);
@@ -228,7 +262,8 @@ String messageQueue[10];
 int messageCount = 0;
 
 void addMessageQueue(String message){
-  if (messageQueue <10){
+  Serial.println("message added to queue " + message);
+  if (messageCount <10){
     messageQueue[messageCount++] = message;
   }else{
     Serial.println("Message queue Full");
