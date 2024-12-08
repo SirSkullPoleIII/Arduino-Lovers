@@ -4,6 +4,8 @@
 
 #define LCD_ADDR 0x3E
 
+const int speakerPin = 9;
+
 WiFiClient client;
 
 void setup() {
@@ -162,13 +164,13 @@ void lcdPrint(String message) {
   Wire.endTransmission();
 
   // play sound from speaker
-  /*
+
   tone(speakerPin, 523.25);
   delay(200);
   tone(speakerPin, 400);
   delay(200);
   noTone(speakerPin);
-*/
+
 }
 
 
