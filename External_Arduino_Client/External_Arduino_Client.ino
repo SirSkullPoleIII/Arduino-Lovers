@@ -2,8 +2,13 @@
 #include <Wire.h>
 #include "ExternalSecrets.h"
 
-#define LCD_ADDR 0x3E
+#define LCD_ADDR 0x3E //use your i2c address
 
+//const char* ssid = "Your SSID";
+//const char* password = "Your Password";
+
+//const char* hostName = "Your hostName eg. arduino-lovers.ddns.net";
+//const int hostPort = The port you forwarded eg. 8080;
 const int speakerPin = 9;
 
 WiFiClient client;
