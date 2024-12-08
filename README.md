@@ -1,5 +1,5 @@
 # Arduino-Lovers
-Here I shall guid you through how to setup your own Arduino-Lovers:
+Here I shall guide you through how to setup your own Arduino-Lovers:
 ## What you will need:
  - A 3D printer
  - 2 Arduino Uno R4 Wifi
