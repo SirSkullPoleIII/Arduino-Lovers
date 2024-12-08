@@ -30,7 +30,8 @@ I2C device found at address 0x3E
 ```
 this will be your LCD's address.
 
-Now delete the line:
+
+Now go back to `Home_Arduino_Server.ino` delete the line:
 
 `#define LCD_ADDR 0x3E` 
 
@@ -43,3 +44,40 @@ in the same fashion as the original.
 Now upload the code to the arduino.
 #### Networking:
 Now that the code is running on the arduino switch the baud rate on the serial monitor to 115200 and you should see it attempting to connect to the internet. If it doesnt work initially try pressing the rest button on your arduino as you may have missed it whilst changing over to the correct baud rate.
+
+```
+Connected to WiFi
+
+Server IP: ***.***.*.***
+
+Server MAC Address: **:**:**:**:**:**
+
+LCD Initialisation
+
+cleared screen
+```
+
+Go to your routers console and find the tab that lets you see all connected devices I am on BT where you will find it under my devices
+
+![BT HUB](https://github.com/user-attachments/assets/f3c189ba-6c16-4975-a7e3-c77d272bf2ea)
+
+
+You will see in the serial monitor `Server IP: ***.***.*.***` which will have actual numbers rather than stars find this IP address and rename it to something sensible like ArduinoHomeWebServer or something.
+
+**You will now need to do some portforwarding.**
+
+Go to the portforwarding tab again for me it is under *advanced settings*, *firewall* and then *portforwarding* forward whichever port you would like I personally used 8040 as my ISP blocks port 80 as that is the standard for webservers and yours probably will too. 
+
+![Port forwarding](https://github.com/user-attachments/assets/420c7fa9-1091-4caf-a200-9955af61ae9f)
+
+If you are struggling to figure this out there are hundreds of tutorials on portforwarding but just set the protocol to both UDP and TCP.
+
+Now go back to `Home_Arduino_Server.ino` and find the line:
+
+`WiFiServer server(8040);`
+
+Near the top around line 17, And change out 8040 for whichever port you decided to forward.
+
+#### Setting up DDNS:
+
+
