@@ -24,6 +24,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  String message = "WiFi Connected";
   Serial.println("Connected to WiFi!");
   Wire.begin();
   lcdInit();
@@ -33,6 +34,7 @@ void setup() {
   lcdCommand(0x80);
   lcdCommand(0x01);
   Serial.println("cleared screen");
+  lcdPrint(message); 
 
   getPubIP();
 

@@ -8,6 +8,7 @@
 //const char* ssid = "Your SSID";
 //const char* password = "Your Password";
 
+
 unsigned long previousMillis = 0;
 const long interval = 5000;
 
@@ -34,6 +35,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  String message = "WiFi Connected";
   Serial.println("\nConnected to WiFi");
 
   // Start server
@@ -52,6 +54,7 @@ void setup() {
   
   Wire.begin();
   lcdInit();
+  lcdPrint(message);
   
   
   delay(2000);
