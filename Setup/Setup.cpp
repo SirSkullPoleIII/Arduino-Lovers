@@ -6,7 +6,7 @@ using namespace std;
 
 void homeArduinoSetup();
 void clientArduinoSetup();
-void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwordList, string i2cAdress, string port);
+void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwordList, string i2cAdress, string port, string hostName);
 
 
 void chooseArduino() {
@@ -62,7 +62,12 @@ void homeArduinoSetup() {
     string SSIDPassword;
     string i2cAddress;
     string port;
+    string hostName;
+
+
     bool inputting = true;
+
+
     cout << "Please input your SSID (Name of your WiFi network) and password split by (, )" << endl;
     cout << "You may add as many Networks as you would like to, end with an empty line." << endl;
 
@@ -96,14 +101,69 @@ void homeArduinoSetup() {
     getline(cin, port);
     cout << "Please enter the I2C address of your LCD > ";
     getline(cin, i2cAddress);
-    writeToFile(arduinoType, SSIDList, passwordList, i2cAddress, port);
+    writeToFile(arduinoType, SSIDList, passwordList, i2cAddress, port, hostName);
 }
+
+
 
 void clientArduinoSetup(){
-    cout << "Client arduino" << endl;
+    string arduinoType = "CLIENT";
+    list<string> SSIDList;
+    list<string> passwordList;
+
+    string SSIDPassword;
+    string i2cAddress;
+    string port;
+    string hostName;
+
+
+    bool inputting = true;
+
+
+    cout << "Please input your SSID (Name of your WiFi network) and password split by (, )" << endl;
+    cout << "You may add as many Networks as you would like to, end with an empty line." << endl;
+
+    while (inputting) {
+        getline(cin, SSIDPassword);
+        if (SSIDPassword.empty()) {
+            break;
+        } else {
+            vector<string> credentials = splitString(SSIDPassword);
+            
+            if (credentials.size() == 2) { 
+
+                for (auto& cred : credentials) {
+                    cred.erase(cred.begin(), find_if(cred.begin(), cred.end(), [](unsigned char ch) {
+                        return !isspace(ch);
+                    }));
+                    cred.erase(find_if(cred.rbegin(), cred.rend(), [](unsigned char ch) {
+                        return !isspace(ch);
+                    }).base(), cred.end());
+                }
+
+                SSIDList.push_back(credentials[0]);
+                passwordList.push_back(credentials[1]);
+
+            } else {
+                cout << "Invalid input. Please input SSID and password separated by a comma." << endl;
+            }
+        }
+    }
+    cout << "Please enter port that you have forwared > ";
+    getline(cin, port);
+    cout << "Please enter the I2C address of your LCD > ";
+    getline(cin, i2cAddress);
+    cout << "Please enter the HostName that you have picked for your DDNS eg: http:/arduino_lovers.ddns.net > ";
+    getline(cin, hostName);
+    writeToFile(arduinoType, SSIDList, passwordList, i2cAddress, port, hostName);
 }
 
-void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwordList, string i2cAdress, string port) {
+
+
+void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwordList, string i2cAdress, string port, string hostName) {
+
+
+    // SERVER ARDUINO
     if (arduinoType == "SERVER") {
         ofstream serverFile("F:/Arduino-Lovers/Home_Arduino_Server/serverConfig.h");
 
@@ -135,12 +195,47 @@ void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwor
             serverFile << "#endif" << endl;
             serverFile.close();
             cout << "Server configuration written to serverConfig.h" << endl;
+        }
+
+
+        //CLIENT ARDUINO
+        }else if (arduinoType == "CLIENT"){
+            ofstream serverFile("F:/Arduino-Lovers/External_Arduino_Client/clientConfig.h");
+
+        if (serverFile.is_open()) {
+            serverFile << "#ifndef CLIENTCONFIG_H\n#define CLIENTCONFIG_H\n";
+
+            // Write SSID array
+            serverFile << "const char* ssid[] = {";
+            for (auto it = SSIDList.begin(); it != SSIDList.end(); ++it) {
+                serverFile << "\"" << *it << "\"";
+                if (next(it) != SSIDList.end()) {
+                    serverFile << ", ";
+                }
+            }
+            serverFile << "};\n";
+
+            // Write password array
+            serverFile << "const char* password[] = {";
+            for (auto it = passwordList.begin(); it != passwordList.end(); ++it) {
+                serverFile << "\"" << *it << "\"";
+                if (next(it) != passwordList.end()) {
+                    serverFile << ", ";
+                }
+            }
+            serverFile << "};\n";
+            serverFile << "const int hostPort = " << port << ";" << endl;
+            serverFile << "#define LCD_ADDR " << i2cAdress<< ";" << endl;
+            serverFile << "const char* hostName " << hostName << ";" << endl;
+
+            serverFile << "#endif" << endl;
+            serverFile.close();
+            cout << "Server configuration written to serverConfig.h" << endl;
         } else {
             cout << "Error opening file!" << endl;
         }
     }
 }
-
 int main() {
     chooseArduino();
     return 0;
