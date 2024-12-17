@@ -22,7 +22,7 @@ void setup() {
   
   Wire.begin();
   lcdInit();
-  lcdPrint(message);
+
   
   
   delay(2000);
@@ -31,30 +31,50 @@ void setup() {
   Serial.println("cleared screen");
 
   // Disconnect from any previously connected network (no argument needed)
-  WiFi.disconnect();
+// Disconnect from any previously connected network (no argument needed)
+WiFi.disconnect();
 
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    for (int i = 0; i<sizeofssid/sizeofssid[0]; i++) {
-      lcdPrint("WiFi Connecting");
-      Serial.println(ssid[i]);
+// Wait for connection
+bool connected = false;
+while (WiFi.status() != WL_CONNECTED) {
+  for (int i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {
+    lcdPrint("WiFi Connecting");
+    Serial.println(ssid[i]);
+    Serial.println(password[i]);
 
-      WiFi.begin(ssid[i], password[i]);
-      unsigned long startAttemptTime = millis();
-      while (WiFi.status() != WL_CONNECTED) {
-        if (millis() - startAttemptTime >= 10000) { // Timeout after 10 seconds
-          Serial.println("Connection attempt timed out.");
-          break; // Try the next SSID
-        }
+    WiFi.begin(ssid[i], password[i]);
+    unsigned long startAttemptTime = millis();
+    while (WiFi.status() != WL_CONNECTED) {
+      if (millis() - startAttemptTime >= 5000) { // Timeout after 5 seconds
+        Serial.println("Connection attempt timed out.");
+        break; // Try the next SSID
+      }
       delay(500);
       Serial.print(".");
-      }
     }
-    lcdPrint("Failed connect");
-    lcdPrint("Retrying...")
+    
+    // Check if connected, exit the loop
+    if (WiFi.status() == WL_CONNECTED) {
+      connected = true;
+      break;
+    }
   }
-  String message = "WiFi Connected";
-  Serial.println("\nConnected to WiFi");
+
+  // If not connected after trying all SSIDs, display "Failed connect" and retry
+  if (!connected) {
+    lcdPrint("Failed connect");
+    lcdPrint("Retrying...");
+    delay(2000); // Delay before retrying the connection
+    WiFi.disconnect(); // Disconnect to reset the connection attempt
+  } else {
+    // Successfully connected
+    String message = "WiFi Connected";
+    lcdPrint(message);
+    Serial.println("\nConnected to WiFi");
+    break;
+  }
+}
+
 
   // Start server
   server.begin();

@@ -193,7 +193,7 @@ void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwor
             }
             serverFile << "};\n";
             serverFile << "const int port = " << port << ";" << endl;
-            serverFile << "#define LCD_ADDR " << i2cAdress<< ";" << endl;
+            serverFile << "#define LCD_ADDR " << i2cAdress << endl;
 
             serverFile << "#endif" << endl;
             serverFile.close();
@@ -230,7 +230,7 @@ void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwor
             serverFile << "};\n";
             serverFile << "const int hostPort = " << port << ";" << endl;
             serverFile << "#define LCD_ADDR " << i2cAdress<< ";" << endl;
-            serverFile << "const char* hostName = " << hostName << ";" << endl;
+            serverFile << "const char* hostName = " << hostName << endl;
 
             serverFile << "#endif" << endl;
             serverFile.close();
