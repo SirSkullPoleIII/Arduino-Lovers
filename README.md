@@ -12,21 +12,11 @@ Here I shall guide you through how to setup your own Arduino-Lovers:
  - Some jumper cables
 
 ## Getting started:
-### Input SSID and password:
-Once you have downloaded or cloned the git repsitory you will want to go into the `Home_Arduino_Server.ino` and `External_Arduino_Client.ino` file and input the SSID (name of the network) and password for each network.
-
- 
-![External ssid password](https://github.com/user-attachments/assets/755ce229-4dbd-42c9-ba5f-e28c9238e1ea)
-*External arduino code*
-
-
-![home ssid password](https://github.com/user-attachments/assets/3c7ee42c-df5d-4c66-a2b9-0489bb5b3b4a)
-*home arduino code*
 
 ### Setup home server:
 The first thing you will want to do is wire up the LCD to the arduino you want to use as your home server. There should be 4 pins on the LCD **VCC, GND, SCL, SDA** which should each be connected to the following pins on your arduino respectively 5/3.3V (Depends on spec of your lcd), GND, SCL and SDA.
 
-Once the LCD is connected run upload the `LCD_I2C_Scanner.ino` file and watch the Serial monitor on 9600 baud. Once the program has completed look through the serial monitor until you find a line something like this:
+Once the LCD is connected upload the `LCD_I2C_Scanner.ino` file loceated in the setup folder and watch the Serial monitor on 9600 baud. Once the program has completed look through the serial monitor until you find a line something like this:
 
 ```
 Checking address 0x3E
@@ -34,16 +24,7 @@ I2C device found at address 0x3E
 ```
 this will be your LCD's address.
 
-
-Now go back to `Home_Arduino_Server.ino` delete the line:
-
-`#define LCD_ADDR 0x3E` 
-
-and input:
-
-`#define LCD_ADDR (your address)` 
-
-in the same fashion as the original.
+Now run the `setup.exe` file and follow the instrctions there 
 
 Now upload the code to the arduino.
 #### Networking:
@@ -86,15 +67,10 @@ Near the top around line 17, And change out 8040 for whichever port you decided 
 This bit is very easy I used noIP as my DDNS provider which is as simple as making an account and using your free hostname to, well create a host name just use whichever DDNS provider you would prefer and follow their instructions. You will then use 
 
 `yoururl.ddns.net:port` to get to the server from external networks and `serverprivateip:port` from the home network.
+
 ### Final steps:
-You now just need to connect the other LCD to the external arduino and change the address in `External_Arduino_Client.ino` file to the same as the address in the home server. 
+You now just need to connect the other LCD to the external arduino and run the `setup.exe` again. Then upload the `External_Arduino_Client.ino` file to it. 
 
-Set `//const char* hostName = "Your hostName eg. arduino-lovers.ddns.net";` to your host name
-
-and set
-
-`//const int hostPort = The port you forwarded eg. 8080;` to the port you forwarded dont forget to uncomment the lines.
-now uncomment that code and you should be able to send messages from your phone or computer to the devices. 
 
 ### Speaker:
 If you want to connect the speaker just connect power and ground and connect the signal wire to digital pin 9 on the arduino and it should work no problem.
