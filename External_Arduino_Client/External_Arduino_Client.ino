@@ -2,13 +2,6 @@
 #include <Wire.h>
 #include "ExternalSecrets.h"
 
-#define LCD_ADDR 0x3E //use your i2c address
-
-//const char* ssid = "Your SSID";
-//const char* password = "Your Password";
-
-//const char* hostName = "Your hostName eg. arduino-lovers.ddns.net";
-//const int hostPort = The port you forwarded eg. 8080;
 const int speakerPin = 9;
 
 WiFiClient client;
@@ -16,18 +9,42 @@ WiFiClient client;
 void setup() {
   Serial.begin(115200);
   delay(100);
-  Serial.println("Connecting to WiFi...");
-  WiFi.begin(ssid, password);
-  
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  String message = "WiFi Connected";
-  Serial.println("Connected to WiFi!");
+
+
   Wire.begin();
   lcdInit();
+  lcdPrint(message);
+  
+  Serial.println("Connecting to WiFi...");
+  lcdPrint("WiFi Connecting");
+  
+
+
+  // Disconnect from any previously connected network (no argument needed)
+  WiFi.disconnect();
+
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED) {
+    for (int i = 0; i<sizeofssid/sizeofssid[0]; i++) {
+      lcdPrint("WiFi Connecting");
+      Serial.println(ssid[i]);
+
+      WiFi.begin(ssid[i], password[i]);
+      unsigned long startAttemptTime = millis();
+      while (WiFi.status() != WL_CONNECTED) {
+        if (millis() - startAttemptTime >= 10000) { // Timeout after 10 seconds
+          Serial.println("Connection attempt timed out.");
+          break; // Try the next SSID
+        }
+      delay(500);
+      Serial.print(".");
+      }
+    }
+    lcdPrint("Failed connect");
+    lcdPrint("Retrying...")
+  }
+  String message = "WiFi Connected";
+  Serial.println("\nConnected to WiFi");
   
   
   delay(2000);

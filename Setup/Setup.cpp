@@ -12,14 +12,15 @@ void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwor
 void chooseArduino() {
     bool chosen = false;
     while (!chosen){
-        cout << "Which arduino will you configure (Server/Client) >";
+        cout << "Which arduino will you configure (Server/Client) **double tap enter to quit** >";
         string arduino;
-        cin >> arduino;
+        getline(cin,arduino);
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
 
         transform(arduino.begin(), arduino.end(), arduino.begin(),
         ::toupper);
+        
 
         if (arduino == "SERVER"){
             chosen = true;
@@ -27,6 +28,8 @@ void chooseArduino() {
         }else if (arduino == "CLIENT"){
             chosen = true;
             clientArduinoSetup();
+        }else if (arduino.empty()){
+            break;
         }else{
             cout << "Invalid response please input either Server or Client to contiue!" << endl;
             chosen = false;
@@ -69,7 +72,7 @@ void homeArduinoSetup() {
 
 
     cout << "Please input your SSID (Name of your WiFi network) and password split by (, )" << endl;
-    cout << "You may add as many Networks as you would like to, end with an empty line." << endl;
+    cout << "You may add as many Networks as you would like to **double tap enter to quit**" << endl;
 
     while (inputting) {
         getline(cin, SSIDPassword);
@@ -195,6 +198,7 @@ void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwor
             serverFile << "#endif" << endl;
             serverFile.close();
             cout << "Server configuration written to serverConfig.h" << endl;
+            chooseArduino();
         }
 
 
@@ -226,11 +230,12 @@ void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwor
             serverFile << "};\n";
             serverFile << "const int hostPort = " << port << ";" << endl;
             serverFile << "#define LCD_ADDR " << i2cAdress<< ";" << endl;
-            serverFile << "const char* hostName " << hostName << ";" << endl;
+            serverFile << "const char* hostName = " << hostName << ";" << endl;
 
             serverFile << "#endif" << endl;
             serverFile.close();
-            cout << "Server configuration written to serverConfig.h" << endl;
+            cout << "Client configuration written to clientConfig.h" << endl;
+            chooseArduino();
         } else {
             cout << "Error opening file!" << endl;
         }
