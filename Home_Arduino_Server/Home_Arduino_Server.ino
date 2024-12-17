@@ -39,7 +39,7 @@ void setup() {
       lcdPrint("WiFi Connecting");
       Serial.println(ssid[i]);
 
-      WiFi.begin(ssid[i], password[i])
+      WiFi.begin(ssid[i], password[i]);
       unsigned long startAttemptTime = millis();
       while (WiFi.status() != WL_CONNECTED) {
         if (millis() - startAttemptTime >= 10000) { // Timeout after 10 seconds
