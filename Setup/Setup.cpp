@@ -6,7 +6,7 @@ using namespace std;
 
 void homeArduinoSetup();
 void clientArduinoSetup();
-void writeToFile();
+void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwordList, string i2cAdress, string port);
 
 
 void chooseArduino() {
@@ -53,59 +53,59 @@ string vectorToString(const std::vector<std::string>& vec) {
     return result;
 }
 
-void homeArduinoSetup(){
+void homeArduinoSetup() {
     string arduinoType = "SERVER";
-
-    vector<string> SSID;
-    vector<string> password;
 
     list<string> SSIDList;
     list<string> passwordList;
-    
+
     string SSIDPassword;
+    string i2cAddress;
+    string port;
     bool inputting = true;
     cout << "Please input your SSID (Name of your WiFi network) and password split by (, )" << endl;
-    cout << "You may add as many Networks as you would like to end double tap *ENTER*" << endl;
+    cout << "You may add as many Networks as you would like to, end with an empty line." << endl;
 
-    while (inputting){
+    while (inputting) {
         getline(cin, SSIDPassword);
-        if (SSIDPassword.empty()){
+        if (SSIDPassword.empty()) {
             break;
-        }else{
+        } else {
             vector<string> credentials = splitString(SSIDPassword);
-            if (credentials.size() == 2){
             
-                SSID.push_back(credentials[0]);
-                password.push_back(credentials[1]);
-            }else{
-                cout << "Invalid input." << endl;
+            if (credentials.size() == 2) { 
+
+                for (auto& cred : credentials) {
+                    cred.erase(cred.begin(), find_if(cred.begin(), cred.end(), [](unsigned char ch) {
+                        return !isspace(ch);
+                    }));
+                    cred.erase(find_if(cred.rbegin(), cred.rend(), [](unsigned char ch) {
+                        return !isspace(ch);
+                    }).base(), cred.end());
+                }
+
+                SSIDList.push_back(credentials[0]);
+                passwordList.push_back(credentials[1]);
+
+            } else {
+                cout << "Invalid input. Please input SSID and password separated by a comma." << endl;
             }
-            
-            string SSIDString = vectorToString(SSID);
-            string passwordString = vectorToString(password);
-            
-            SSIDList.push_back(SSIDString);
-
-            passwordString.erase(passwordString.begin(), std::find_if(passwordString.begin(), passwordString.end(), [](unsigned char ch) {
-                return !std::isspace(ch);
-            }));
-
-            passwordList.push_back(passwordString);
-            cout << SSIDString << endl;
-            cout << passwordString << endl;
-
         }
     }
-    writeToFile(arduinoType, SSIDList, passwordList);
+    cout << "Please enter port that you have forwared > ";
+    getline(cin, port);
+    cout << "Please enter the I2C address of your LCD > ";
+    getline(cin, i2cAddress);
+    writeToFile(arduinoType, SSIDList, passwordList, i2cAddress, port);
 }
 
 void clientArduinoSetup(){
     cout << "Client arduino" << endl;
 }
 
-void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwordList) {
+void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwordList, string i2cAdress, string port) {
     if (arduinoType == "SERVER") {
-        ofstream serverFile("serverConfig.h");
+        ofstream serverFile("F:/Arduino-Lovers/Home_Arduino_Server/serverConfig.h");
 
         if (serverFile.is_open()) {
             serverFile << "#ifndef SERVERCONFIG_H\n#define SERVERCONFIG_H\n";
@@ -129,8 +129,10 @@ void writeToFile(string arduinoType, list<string> SSIDList, list<string> passwor
                 }
             }
             serverFile << "};\n";
+            serverFile << "const int port = " << port << ";" << endl;
+            serverFile << "#define LCD_ADDR " << i2cAdress<< ";" << endl;
 
-            serverFile << "#endif // SERVERCONFIG_H\n";
+            serverFile << "#endif" << endl;
             serverFile.close();
             cout << "Server configuration written to serverConfig.h" << endl;
         } else {
